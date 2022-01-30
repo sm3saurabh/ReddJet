@@ -114,7 +114,14 @@ fun DiveIntoSubRedditAnimator(modifier: Modifier) {
       modifier = Modifier.align(Alignment.CenterHorizontally),
     )
 
+    Spacer(modifier = Modifier.height(dimensionResource(id = R.dimen.default_padding)))
+
     // Name of subreddits with animations
+    Text(
+      text = "r/ContagiousLaughter",
+      style = MaterialTheme.typography.h4,
+      modifier = Modifier.align(Alignment.CenterHorizontally),
+    )
   }
 }
 
