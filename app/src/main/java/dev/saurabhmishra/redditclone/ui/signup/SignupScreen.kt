@@ -38,7 +38,7 @@ fun SignupScreen() {
 
 @Composable
 fun SignupVideoPlayer() {
-  // TODO - Replace with actual 
+  // TODO - Replace with actual video player
   Image(painter = ColorPainter(Color.Blue), contentDescription = "Some random shit")
 }
 
@@ -84,7 +84,8 @@ fun SignupContent() {
       .align(Alignment.CenterHorizontally)
       .padding(
         bottom = dimensionResource(
-          id = R.dimen.default_padding)
+          id = R.dimen.default_padding
+        )
       )
     )
 
