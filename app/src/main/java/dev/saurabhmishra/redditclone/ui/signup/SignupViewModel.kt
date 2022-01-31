@@ -1,4 +1,7 @@
 package dev.saurabhmishra.redditclone.ui.signup
 
-class SignupViewModel {
+import dev.saurabhmishra.redditclone.base.BaseViewModel
+
+class SignupViewModel: BaseViewModel() {
+
 }

@@ -67,7 +67,7 @@ fun SignupContent() {
 
     // 2. Reddit logo
     Image(
-      painter = painterResource(id = R.drawable.ic_launcher_foreground),
+      painter = painterResource(id = R.drawable.ic_reddit_icon),
       contentDescription = stringResource(id = R.string.label_logo),
       modifier = Modifier
         .size(dimensionResource(id = R.dimen.logo_size))
@@ -95,7 +95,7 @@ fun SignupContent() {
     // 6. Already a member text
     Text(
       text = stringResource(id = R.string.label_already_member),
-      style = MaterialTheme.typography.caption,
+      style = MaterialTheme.typography.overline,
       modifier = Modifier
         .align(Alignment.CenterHorizontally)
         .padding(top = dimensionResource(id = R.dimen.default_padding)),
@@ -161,7 +161,7 @@ fun SocialSignupSection(modifier: Modifier) {
 
     // 1. Signup with google
     SocialSignupButton(
-      imageId = R.drawable.ic_launcher_foreground,
+      imageId = R.drawable.ic_google_icon,
       descriptionId = R.string.label_sign_up_with_google,
       buttonTextId = R.string.label_sign_up_with_google,
       modifier = signupButtonModifier,
@@ -174,7 +174,7 @@ fun SocialSignupSection(modifier: Modifier) {
 
     // 2. Signup with apple
     SocialSignupButton(
-      imageId = R.drawable.ic_launcher_foreground,
+      imageId = R.drawable.ic_apple_icon,
       descriptionId = R.string.label_sign_up_with_apple,
       buttonTextId = R.string.label_sign_up_with_apple,
       modifier = signupButtonModifier,
@@ -187,7 +187,7 @@ fun SocialSignupSection(modifier: Modifier) {
 
     // 3. Signup with email
     SocialSignupButton(
-      imageId = R.drawable.ic_launcher_foreground,
+      imageId = R.drawable.ic_email_icon,
       descriptionId = R.string.label_sign_up_with_email,
       buttonTextId = R.string.label_sign_up_with_email,
       modifier = signupButtonModifier,
@@ -222,6 +222,8 @@ fun SocialSignupButton(
       contentDescription = stringResource(id = descriptionId),
       modifier = Modifier.size(dimensionResource(id = R.dimen.button_drawable_size)),
     )
+
+    Spacer(modifier = Modifier.width(dimensionResource(id = R.dimen.default_padding)))
 
     Text(text = stringResource(id = buttonTextId), style = MaterialTheme.typography.button)
   }

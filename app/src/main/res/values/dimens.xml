@@ -2,7 +2,7 @@
 <resources>
   <dimen name="default_padding">16dp</dimen>
   <dimen name="text_padding">4dp</dimen>
-  <dimen name="logo_size">64dp</dimen>
+  <dimen name="logo_size">40dp</dimen>
   <dimen name="button_drawable_size">24dp</dimen>
   <dimen name="button_corner_radius">20dp</dimen>
   <dimen name="social_signup_button_padding">24dp</dimen>
