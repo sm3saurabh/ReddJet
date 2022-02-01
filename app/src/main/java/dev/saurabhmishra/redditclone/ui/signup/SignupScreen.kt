@@ -3,6 +3,8 @@ package dev.saurabhmishra.redditclone.ui.signup
 import androidx.annotation.DimenRes
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
+import androidx.compose.animation.*
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -111,6 +113,7 @@ fun SignupContent(subRedditName: String) {
 }
 
 
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun DiveIntoSubRedditAnimator(modifier: Modifier, subRedditName: String) {
   Column(modifier = modifier, verticalArrangement = Arrangement.Center) {
@@ -122,12 +125,22 @@ fun DiveIntoSubRedditAnimator(modifier: Modifier, subRedditName: String) {
 
     Spacer(modifier = Modifier.height(dimensionResource(id = R.dimen.default_padding)))
 
+
     // Name of subreddits with animations
-    Text(
-      text = subRedditName,
-      style = MaterialTheme.typography.h4,
+    AnimatedContent(
       modifier = Modifier.align(Alignment.CenterHorizontally),
-    )
+      targetState = subRedditName,
+      transitionSpec = {
+        slideIntoContainer(towards = AnimatedContentScope.SlideDirection.End, animationSpec = tween(durationMillis = 1000)) with slideOutOfContainer(
+          towards = AnimatedContentScope.SlideDirection.End, animationSpec = tween(durationMillis = 1000))
+      },
+    ) {
+      Text(
+        text = subRedditName,
+        style = MaterialTheme.typography.h4,
+      )
+
+    }
   }
 }
 
