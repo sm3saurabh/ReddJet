@@ -5,6 +5,7 @@
   <dimen name="logo_size">40dp</dimen>
   <dimen name="button_drawable_size">24dp</dimen>
   <dimen name="button_corner_radius">20dp</dimen>
+  <dimen name="button_drawable_padding">8dp</dimen>
   <dimen name="social_signup_button_padding">24dp</dimen>
   <dimen name="signup_spacer_height">8dp</dimen>
 </resources>
