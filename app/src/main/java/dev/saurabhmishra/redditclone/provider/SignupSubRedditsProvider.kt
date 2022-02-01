@@ -10,10 +10,12 @@ class SignupSubRedditsProviderImpl: SignupSubRedditsProvider {
 
   override fun getListOfSubReddits(): List<SubReddit> {
     return listOf(
-      SubReddit("ContagiousLaughter"),
-      SubReddit("Art"),
-      SubReddit("ShowerThoughts"),
-      SubReddit("Gaming"),
+      SubReddit("r/ContagiousLaughter"),
+      SubReddit("r/Art"),
+      SubReddit("r/ShowerThoughts"),
+      SubReddit("r/Gaming"),
+      SubReddit("Reddit"),
+      SubReddit("Anything")
     )
   }
 

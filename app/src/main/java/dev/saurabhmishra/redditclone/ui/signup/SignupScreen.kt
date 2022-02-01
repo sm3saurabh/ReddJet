@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -23,16 +25,20 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import dev.saurabhmishra.redditclone.R
 import dev.saurabhmishra.redditclone.theme.RedditCloneTheme
 import dev.saurabhmishra.redditclone.utils.Wood
 
 @Composable
-fun SignupScreen() {
+fun SignupScreen(signupViewModel: SignupViewModel = viewModel()) {
+
+  val subRedditName by signupViewModel.signupAnimatedName.observeAsState("Reddit")
+
   // The box that contains video player and the signup content
   Surface(Modifier.fillMaxSize()) {
     SignupVideoPlayer()
-    SignupContent()
+    SignupContent(subRedditName = subRedditName)
   }
 }
 
@@ -43,7 +49,7 @@ fun SignupVideoPlayer() {
 }
 
 @Composable
-fun SignupContent() {
+fun SignupContent(subRedditName: String) {
   Column(
     modifier = Modifier
       .fillMaxSize()
@@ -77,7 +83,7 @@ fun SignupContent() {
     // 3. Dive into subreddits
     DiveIntoSubRedditAnimator(modifier = Modifier
       .weight(1f)
-      .align(Alignment.CenterHorizontally))
+      .align(Alignment.CenterHorizontally), subRedditName = subRedditName)
 
     // 4. Terms and conditions
     TermsAndConditionsText(modifier = Modifier
@@ -106,7 +112,7 @@ fun SignupContent() {
 
 
 @Composable
-fun DiveIntoSubRedditAnimator(modifier: Modifier) {
+fun DiveIntoSubRedditAnimator(modifier: Modifier, subRedditName: String) {
   Column(modifier = modifier, verticalArrangement = Arrangement.Center) {
     Text(
       text = stringResource(id = R.string.label_dive_into),
@@ -118,7 +124,7 @@ fun DiveIntoSubRedditAnimator(modifier: Modifier) {
 
     // Name of subreddits with animations
     Text(
-      text = "r/ContagiousLaughter",
+      text = subRedditName,
       style = MaterialTheme.typography.h4,
       modifier = Modifier.align(Alignment.CenterHorizontally),
     )
@@ -220,10 +226,9 @@ fun SocialSignupButton(
     Image(
       painter = painterResource(id = imageId),
       contentDescription = stringResource(id = descriptionId),
-      modifier = Modifier.size(dimensionResource(id = R.dimen.button_drawable_size)),
     )
 
-    Spacer(modifier = Modifier.width(dimensionResource(id = R.dimen.default_padding)))
+    Spacer(modifier = Modifier.width(dimensionResource(id = R.dimen.button_drawable_padding)))
 
     Text(text = stringResource(id = buttonTextId), style = MaterialTheme.typography.button)
   }
@@ -241,6 +246,10 @@ fun SocialSignupButton(
 @Preview
 fun PreviewSignupScreenDarkMode() {
   RedditCloneTheme(darkTheme = true) {
-    SignupScreen()
+    // The box that contains video player and the signup content
+    Surface(Modifier.fillMaxSize()) {
+      SignupVideoPlayer()
+      SignupContent(subRedditName = "Test Reddit")
+    }
   }
 }
