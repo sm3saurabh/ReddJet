@@ -120,7 +120,8 @@ fun DiveIntoSubRedditAnimator(modifier: Modifier, subRedditName: String) {
     Text(
       text = stringResource(id = R.string.label_dive_into),
       style = MaterialTheme.typography.h4,
-      modifier = Modifier.align(Alignment.CenterHorizontally),
+      modifier = Modifier.fillMaxWidth(),
+      textAlign = TextAlign.Center
     )
 
     Spacer(modifier = Modifier.height(dimensionResource(id = R.dimen.default_padding)))
@@ -128,7 +129,7 @@ fun DiveIntoSubRedditAnimator(modifier: Modifier, subRedditName: String) {
 
     // Name of subreddits with animations
     AnimatedContent(
-      modifier = Modifier.align(Alignment.CenterHorizontally),
+      modifier = Modifier.fillMaxWidth(),
       targetState = subRedditName,
       transitionSpec = {
         slideIntoContainer(towards = AnimatedContentScope.SlideDirection.End, animationSpec = tween(durationMillis = 1000)) with slideOutOfContainer(
@@ -138,6 +139,8 @@ fun DiveIntoSubRedditAnimator(modifier: Modifier, subRedditName: String) {
       Text(
         text = subRedditName,
         style = MaterialTheme.typography.h4,
+        modifier = Modifier.fillMaxWidth(),
+        textAlign = TextAlign.Center
       )
 
     }
