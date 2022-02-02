@@ -4,14 +4,13 @@ import androidx.annotation.DimenRes
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.animation.*
-import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -29,8 +28,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import dev.saurabhmishra.redditclone.R
+import dev.saurabhmishra.redditclone.extensions.safeLaunch
 import dev.saurabhmishra.redditclone.theme.RedditCloneTheme
 import dev.saurabhmishra.redditclone.utils.Wood
+import kotlin.math.floor
+import kotlin.math.roundToInt
 
 @Composable
 fun SignupScreen(signupViewModel: SignupViewModel = viewModel()) {
@@ -127,24 +129,40 @@ fun DiveIntoSubRedditAnimator(modifier: Modifier, subRedditName: String) {
     Spacer(modifier = Modifier.height(dimensionResource(id = R.dimen.default_padding)))
 
 
-    // Name of subreddits with animations
-    AnimatedContent(
-      modifier = Modifier.fillMaxWidth(),
-      targetState = subRedditName,
-      transitionSpec = {
-        slideIntoContainer(towards = AnimatedContentScope.SlideDirection.End, animationSpec = tween(durationMillis = 1000)) with slideOutOfContainer(
-          towards = AnimatedContentScope.SlideDirection.End, animationSpec = tween(durationMillis = 1000))
-      },
-    ) {
-      Text(
-        text = subRedditName,
-        style = MaterialTheme.typography.h4,
-        modifier = Modifier.fillMaxWidth(),
-        textAlign = TextAlign.Center
-      )
-
-    }
+    AnimatedSubRedditName(subRedditName)
   }
+}
+
+@Composable
+private fun AnimatedSubRedditName(subRedditName: String) {
+  val nameState = remember { mutableStateOf(0f) }
+
+  LaunchedEffect(key1 = subRedditName) {
+    animate(
+      0f,
+      subRedditName.length.toFloat(),
+      animationSpec = tween(durationMillis = 1000, easing = LinearEasing)
+    ) { value, _ ->
+      nameState.value = value
+    }
+    //nameState.animateTo(subRedditName.length.toFloat(), animationSpec = tween(durationMillis = 1000))
+  }
+
+  // Name of subreddits with animations
+
+  val currentIndex = floor(nameState.value).toInt()
+
+  val subRedditNameState = if (currentIndex <= subRedditName.length) {
+    subRedditName.substring(0, floor(nameState.value).toInt())
+  } else ""
+
+  Text(
+    text = subRedditNameState,
+    style = MaterialTheme.typography.h4,
+    modifier = Modifier.fillMaxWidth(),
+    textAlign = TextAlign.Center
+  )
+
 }
 
 @Composable
