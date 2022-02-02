@@ -30,17 +30,16 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
@@ -50,7 +49,6 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
-import com.google.android.exoplayer2.SimpleExoPlayer
 import com.google.android.exoplayer2.ui.AspectRatioFrameLayout
 import com.google.android.exoplayer2.ui.PlayerView
 import dev.saurabhmishra.redditclone.R
@@ -161,7 +159,7 @@ fun DiveIntoSubRedditAnimator(modifier: Modifier, subRedditName: String) {
   Column(modifier = modifier, verticalArrangement = Arrangement.Center) {
     Text(
       text = stringResource(id = R.string.label_dive_into),
-      style = MaterialTheme.typography.h4,
+      style = MaterialTheme.typography.h4.copy(fontWeight = FontWeight.Bold),
       modifier = Modifier.fillMaxWidth(),
       textAlign = TextAlign.Center
     )
@@ -196,7 +194,7 @@ private fun AnimatedSubRedditName(subRedditName: String) {
 
   Text(
     text = subRedditNameState,
-    style = MaterialTheme.typography.h4,
+    style = MaterialTheme.typography.h4.copy(fontWeight = FontWeight.Bold),
     modifier = Modifier.fillMaxWidth(),
     textAlign = TextAlign.Center
   )
