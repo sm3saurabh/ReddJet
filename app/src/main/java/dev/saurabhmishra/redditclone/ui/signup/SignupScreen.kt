@@ -25,6 +25,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -34,6 +35,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -46,12 +48,16 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
+import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.ui.AspectRatioFrameLayout
 import com.google.android.exoplayer2.ui.PlayerView
 import dev.saurabhmishra.redditclone.R
+import dev.saurabhmishra.redditclone.model.SubReddit
 import dev.saurabhmishra.redditclone.theme.RedditCloneTheme
 import dev.saurabhmishra.redditclone.utils.Wood
 import kotlin.math.floor
@@ -59,36 +65,92 @@ import kotlin.math.floor
 @Composable
 fun SignupScreen(signupViewModel: SignupViewModel = viewModel()) {
 
-  val subRedditName by signupViewModel.signupAnimatedName.observeAsState("Reddit")
+  val subReddit by signupViewModel.signupAnimatedName.observeAsState()
 
-  // The box that contains video player and the signup content
-  Surface(Modifier.fillMaxSize()) {
-    SignupVideoPlayer()
-    SignupContent(subRedditName = subRedditName)
+  subReddit?.let { nnSubReddit ->
+    // The box that contains video player and the signup content
+    Surface(Modifier.fillMaxSize()) {
+      SignupVideoPlayer(nnSubReddit) {
+        // When video ended
+        signupViewModel.emitNextSubReddit.invoke()
+      }
+      SignupContent(subRedditName = nnSubReddit.name)
+    }
   }
 }
 
+/*
+  * The idea of this video player is as follows
+  * When subReddit name comes from viewModel, we extract the associated video Uri from it
+  * Then we play the video immediately and attach a listener to the playback
+  * When the video ends, we signal the viewModel to move to the next subReddit
+  * */
 @Composable
-fun SignupVideoPlayer() {
-  val sampleVideo = "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+fun SignupVideoPlayer(subReddit: SubReddit, onVideoEnd: () -> Unit) {
+
+  val lifecycleOwner = LocalLifecycleOwner.current
+
   val context = LocalContext.current
+
   val player = ExoPlayer.Builder(context).build()
-  val playerView = PlayerView(context)
-  playerView.useController = false
-  playerView.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FILL
-  val mediaItem = MediaItem.fromUri(sampleVideo)
+
+  val playerView = PlayerView(context).also { playerView ->
+    playerView.useController = false
+    playerView.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FILL
+    playerView.player = player
+  }
+
+  val mediaItem = MediaItem.fromUri(subReddit.videoPath)
 
   player.setMediaItem(mediaItem)
-  playerView.player = player
 
-  LaunchedEffect(player) {
-    player.prepare()
-    player.playWhenReady = true
+  DisposableEffect(Unit) {
+    initializeVideoPlayer(player, lifecycleOwner, onVideoEnd)
 
+    onDispose {
+      player.release()
+    }
   }
+
   AndroidView(factory = {
     playerView
   })
+}
+
+private fun initializeVideoPlayer(
+  player: ExoPlayer,
+  lifecycleOwner: LifecycleOwner,
+  onVideoEnd: () -> Unit,
+) {
+  player.prepare()
+  player.play()
+
+  val lifecycleObserver = object : DefaultLifecycleObserver {
+    override fun onPause(owner: LifecycleOwner) {
+      super.onPause(owner)
+      player.pause()
+    }
+
+    override fun onResume(owner: LifecycleOwner) {
+      super.onResume(owner)
+      player.play()
+    }
+  }
+
+  val playerListener = object : Player.Listener {
+    override fun onPlaybackStateChanged(playbackState: Int) {
+      when (playbackState) {
+        Player.STATE_ENDED -> onVideoEnd()
+        else -> {
+          Wood.debug("We are not worried about other changes in playback state")
+        }
+      }
+    }
+  }
+
+  player.addListener(playerListener)
+
+  lifecycleOwner.lifecycle.addObserver(lifecycleObserver)
 }
 
 @Composable
@@ -317,9 +379,11 @@ fun SocialSignupButton(
 fun PreviewSignupScreenDarkMode() {
   RedditCloneTheme(darkTheme = true) {
     // The box that contains video player and the signup content
+    val subReddit = SubReddit("Test Reddit",
+      "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4")
     Surface(Modifier.fillMaxSize()) {
-      SignupVideoPlayer()
-      SignupContent(subRedditName = "Test Reddit")
+      SignupVideoPlayer(subReddit) {}
+      SignupContent(subRedditName = subReddit.name)
     }
   }
 }
