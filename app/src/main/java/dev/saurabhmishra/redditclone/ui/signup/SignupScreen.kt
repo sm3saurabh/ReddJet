@@ -3,7 +3,6 @@ package dev.saurabhmishra.redditclone.ui.signup
 import androidx.annotation.DimenRes
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
-import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animate
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
@@ -70,7 +69,7 @@ fun SignupScreen(signupViewModel: SignupViewModel = viewModel()) {
   subReddit?.let { nnSubReddit ->
     // The box that contains video player and the signup content
     Surface(Modifier.fillMaxSize()) {
-      SignupVideoPlayer(nnSubReddit) {
+      SignupVideoPlayer(nnSubReddit, signupViewModel.fetchExoPlayer.invoke()) {
         // When video ended
         signupViewModel.emitNextSubReddit.invoke()
       }
@@ -86,34 +85,32 @@ fun SignupScreen(signupViewModel: SignupViewModel = viewModel()) {
   * When the video ends, we signal the viewModel to move to the next subReddit
   * */
 @Composable
-fun SignupVideoPlayer(subReddit: SubReddit, onVideoEnd: () -> Unit) {
+fun SignupVideoPlayer(subReddit: SubReddit, player: ExoPlayer, onVideoEnd: () -> Unit) {
 
   val lifecycleOwner = LocalLifecycleOwner.current
 
   val context = LocalContext.current
 
-  val player = ExoPlayer.Builder(context).build()
+  DisposableEffect(Unit) {
+    initializeVideoPlayer(player, lifecycleOwner, onVideoEnd)
 
-  val playerView = PlayerView(context).also { playerView ->
-    playerView.useController = false
-    playerView.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FILL
-    playerView.player = player
+    onDispose {
+      Wood.debug("Exoplayer is disposed")
+      player.release()
+    }
   }
 
   val mediaItem = MediaItem.fromUri(subReddit.videoPath)
 
   player.setMediaItem(mediaItem)
 
-  DisposableEffect(Unit) {
-    initializeVideoPlayer(player, lifecycleOwner, onVideoEnd)
-
-    onDispose {
-      player.release()
-    }
-  }
-
   AndroidView(factory = {
-    playerView
+    PlayerView(context).also { playerView ->
+      playerView.useController = false
+      playerView.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FILL
+      playerView.player = player
+      playerView.setKeepContentOnPlayerReset(true)
+    }
   })
 }
 
@@ -238,10 +235,13 @@ private fun AnimatedSubRedditName(subRedditName: String) {
   val nameState = remember { mutableStateOf(0f) }
 
   LaunchedEffect(key1 = subRedditName) {
+
+    val duration = 80 * subRedditName.length
+
     animate(
       0f,
       subRedditName.length.toFloat(),
-      animationSpec = tween(durationMillis = 1000, easing = LinearEasing)
+      animationSpec = tween(durationMillis = duration, delayMillis = 1000)
     ) { value, _ ->
       nameState.value = value
     }
@@ -382,7 +382,7 @@ fun PreviewSignupScreenDarkMode() {
     val subReddit = SubReddit("Test Reddit",
       "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4")
     Surface(Modifier.fillMaxSize()) {
-      SignupVideoPlayer(subReddit) {}
+      SignupVideoPlayer(subReddit, ExoPlayer.Builder(LocalContext.current).build()) {}
       SignupContent(subRedditName = subReddit.name)
     }
   }
