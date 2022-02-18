@@ -1,8 +1,12 @@
 package dev.saurabhmishra.redditclone.ui.signup
 
+import android.view.View
+import android.view.ViewGroup
+import android.widget.FrameLayout
 import androidx.annotation.DimenRes
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animate
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
@@ -47,6 +51,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -59,6 +64,7 @@ import dev.saurabhmishra.redditclone.R
 import dev.saurabhmishra.redditclone.model.SubReddit
 import dev.saurabhmishra.redditclone.theme.RedditCloneTheme
 import dev.saurabhmishra.redditclone.utils.Wood
+import kotlinx.coroutines.delay
 import kotlin.math.floor
 
 @Composable
@@ -69,11 +75,10 @@ fun SignupScreen(signupViewModel: SignupViewModel = viewModel()) {
   subReddit?.let { nnSubReddit ->
     // The box that contains video player and the signup content
     Surface(Modifier.fillMaxSize()) {
-      SignupVideoPlayer(nnSubReddit, signupViewModel.fetchExoPlayer.invoke()) {
-        // When video ended
+      SignupVideoPlayer(nnSubReddit, signupViewModel.fetchExoPlayer.invoke())
+      SignupContent(subRedditName = nnSubReddit.name) {
         signupViewModel.emitNextSubReddit.invoke()
       }
-      SignupContent(subRedditName = nnSubReddit.name)
     }
   }
 }
@@ -85,14 +90,14 @@ fun SignupScreen(signupViewModel: SignupViewModel = viewModel()) {
   * When the video ends, we signal the viewModel to move to the next subReddit
   * */
 @Composable
-fun SignupVideoPlayer(subReddit: SubReddit, player: ExoPlayer, onVideoEnd: () -> Unit) {
+fun SignupVideoPlayer(subReddit: SubReddit, player: ExoPlayer) {
 
   val lifecycleOwner = LocalLifecycleOwner.current
 
   val context = LocalContext.current
 
   DisposableEffect(Unit) {
-    initializeVideoPlayer(player, lifecycleOwner, onVideoEnd)
+    initializeVideoPlayer(player, lifecycleOwner)
 
     onDispose {
       Wood.debug("Exoplayer is disposed")
@@ -105,19 +110,26 @@ fun SignupVideoPlayer(subReddit: SubReddit, player: ExoPlayer, onVideoEnd: () ->
   player.setMediaItem(mediaItem)
 
   AndroidView(factory = {
-    PlayerView(context).also { playerView ->
+    val videoPlayerRoot = FrameLayout(context)
+
+    videoPlayerRoot.addView(PlayerView(context).also { playerView ->
       playerView.useController = false
       playerView.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FILL
       playerView.player = player
       playerView.setKeepContentOnPlayerReset(true)
-    }
+    })
+
+    videoPlayerRoot.addView(View(context).also { translucentView ->
+      translucentView.setBackgroundColor(ContextCompat.getColor(context, R.color.translucent))
+    }, ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
+
+    videoPlayerRoot
   })
 }
 
 private fun initializeVideoPlayer(
   player: ExoPlayer,
   lifecycleOwner: LifecycleOwner,
-  onVideoEnd: () -> Unit,
 ) {
   player.prepare()
   player.play()
@@ -134,24 +146,24 @@ private fun initializeVideoPlayer(
     }
   }
 
-  val playerListener = object : Player.Listener {
-    override fun onPlaybackStateChanged(playbackState: Int) {
-      when (playbackState) {
-        Player.STATE_ENDED -> onVideoEnd()
-        else -> {
-          Wood.debug("We are not worried about other changes in playback state")
-        }
-      }
-    }
-  }
-
-  player.addListener(playerListener)
+//  val playerListener = object : Player.Listener {
+//    override fun onPlaybackStateChanged(playbackState: Int) {
+//      when (playbackState) {
+//        Player.STATE_ENDED -> onVideoEnd()
+//        else -> {
+//          Wood.debug("We are not worried about other changes in playback state")
+//        }
+//      }
+//    }
+//  }
+//
+//  player.addListener(playerListener)
 
   lifecycleOwner.lifecycle.addObserver(lifecycleObserver)
 }
 
 @Composable
-fun SignupContent(subRedditName: String) {
+fun SignupContent(subRedditName: String, onAnimationEnd: () -> Unit) {
   Column(
     modifier = Modifier
       .fillMaxSize()
@@ -185,7 +197,7 @@ fun SignupContent(subRedditName: String) {
     // 3. Dive into subreddits
     DiveIntoSubRedditAnimator(modifier = Modifier
       .weight(1f)
-      .align(Alignment.CenterHorizontally), subRedditName = subRedditName)
+      .align(Alignment.CenterHorizontally), subRedditName = subRedditName, onAnimationEnd)
 
     // 4. Terms and conditions
     TermsAndConditionsText(modifier = Modifier
@@ -214,7 +226,7 @@ fun SignupContent(subRedditName: String) {
 
 
 @Composable
-fun DiveIntoSubRedditAnimator(modifier: Modifier, subRedditName: String) {
+fun DiveIntoSubRedditAnimator(modifier: Modifier, subRedditName: String, onAnimationEnd: () -> Unit) {
   Column(modifier = modifier, verticalArrangement = Arrangement.Center) {
     Text(
       text = stringResource(id = R.string.label_dive_into),
@@ -226,12 +238,12 @@ fun DiveIntoSubRedditAnimator(modifier: Modifier, subRedditName: String) {
     Spacer(modifier = Modifier.height(dimensionResource(id = R.dimen.default_padding)))
 
 
-    AnimatedSubRedditName(subRedditName)
+    AnimatedSubRedditName(subRedditName, onAnimationEnd)
   }
 }
 
 @Composable
-private fun AnimatedSubRedditName(subRedditName: String) {
+private fun AnimatedSubRedditName(subRedditName: String, onAnimationEnd: () -> Unit) {
   val nameState = remember { mutableStateOf(0f) }
 
   LaunchedEffect(key1 = subRedditName) {
@@ -241,10 +253,13 @@ private fun AnimatedSubRedditName(subRedditName: String) {
     animate(
       0f,
       subRedditName.length.toFloat(),
-      animationSpec = tween(durationMillis = duration, delayMillis = 1000)
+      animationSpec = tween(durationMillis = duration, delayMillis = 1000, easing = LinearEasing)
     ) { value, _ ->
       nameState.value = value
     }
+
+    delay(2000)
+    onAnimationEnd()
   }
 
   // Name of subreddits with animations
@@ -382,8 +397,8 @@ fun PreviewSignupScreenDarkMode() {
     val subReddit = SubReddit("Test Reddit",
       "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4")
     Surface(Modifier.fillMaxSize()) {
-      SignupVideoPlayer(subReddit, ExoPlayer.Builder(LocalContext.current).build()) {}
-      SignupContent(subRedditName = subReddit.name)
+      SignupVideoPlayer(subReddit, ExoPlayer.Builder(LocalContext.current).build())
+      SignupContent(subRedditName = subReddit.name) {}
     }
   }
 }
