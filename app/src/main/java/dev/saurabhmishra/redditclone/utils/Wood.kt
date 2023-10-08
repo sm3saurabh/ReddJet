@@ -32,12 +32,11 @@ object Wood {
   }
 
   private fun createTagFromStackTraceElement(element: StackTraceElement): String {
-    var tag: String = element.className
+    var tag: String = element.className.substringAfterLast('.')
     val m: Matcher = ANONYMOUS_CLASS.matcher(tag)
     if (m.find()) {
       tag = m.replaceAll("")
     }
-    tag = tag.substring(tag.lastIndexOf('.') + 1)
     // Tag length limit was removed in API 24.
     return if (tag.length <= MAX_TAG_LENGTH || Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
       tag

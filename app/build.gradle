@@ -6,12 +6,12 @@ plugins {
 }
 
 android {
-  compileSdk 32
+  compileSdk 34
 
   defaultConfig {
     applicationId "dev.saurabhmishra.redditclone"
-    minSdk 21
-    targetSdk 32
+    minSdk 23
+    targetSdk 34
     versionCode 1
     versionName "1.0"
 
@@ -28,11 +28,11 @@ android {
     }
   }
   compileOptions {
-    sourceCompatibility JavaVersion.VERSION_1_8
-    targetCompatibility JavaVersion.VERSION_1_8
+    sourceCompatibility JavaVersion.VERSION_11
+    targetCompatibility JavaVersion.VERSION_11
   }
   kotlinOptions {
-    jvmTarget = '1.8'
+    jvmTarget = '11'
   }
   buildFeatures {
     compose true
@@ -74,8 +74,8 @@ dependencies {
 
   implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.0"
 
-  implementation "com.google.dagger:hilt-android:2.40.5"
-  kapt "com.google.dagger:hilt-compiler:2.40.5"
+  implementation "com.google.dagger:hilt-android:2.48.1"
+  kapt "com.google.dagger:hilt-compiler:2.48.1"
 
 
 
