@@ -57,12 +57,11 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
-import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.ui.AspectRatioFrameLayout
 import com.google.android.exoplayer2.ui.PlayerView
 import dev.saurabhmishra.redditclone.R
 import dev.saurabhmishra.redditclone.model.SubReddit
-import dev.saurabhmishra.redditclone.theme.RedditCloneTheme
+import dev.saurabhmishra.redditclone.theme.ReddJetTheme
 import dev.saurabhmishra.redditclone.utils.Wood
 import kotlinx.coroutines.delay
 import kotlin.math.floor
@@ -83,12 +82,6 @@ fun SignupScreen(signupViewModel: SignupViewModel = viewModel()) {
   }
 }
 
-/*
-  * The idea of this video player is as follows
-  * When subReddit name comes from viewModel, we extract the associated video Uri from it
-  * Then we play the video immediately and attach a listener to the playback
-  * When the video ends, we signal the viewModel to move to the next subReddit
-  * */
 @Composable
 fun SignupVideoPlayer(subReddit: SubReddit, player: ExoPlayer) {
 
@@ -381,18 +374,10 @@ fun SocialSignupButton(
   }
 }
 
-//@Composable
-//@Preview
-//fun PreviewSignupScreen() {
-//  RedditCloneTheme(darkTheme = false) {
-//    SignupScreen()
-//  }
-//}
-
 @Composable
 @Preview
 fun PreviewSignupScreenDarkMode() {
-  RedditCloneTheme(darkTheme = true) {
+  ReddJetTheme(darkTheme = true) {
     // The box that contains video player and the signup content
     val subReddit = SubReddit("Test Reddit",
       "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4")

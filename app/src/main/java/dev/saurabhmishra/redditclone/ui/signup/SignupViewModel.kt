@@ -11,7 +11,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SignupViewModel @Inject constructor(
-  private val subRedditsProvider: SignupSubRedditsProvider,
+  subRedditsProvider: SignupSubRedditsProvider,
   private val exoPlayer: ExoPlayer
 ): BaseViewModel() {
 
